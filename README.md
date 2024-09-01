@@ -33,7 +33,7 @@ This is a data visualization web application built with Node.js, Express, EJS, a
 3. Run `npm run build:css` to generate `public/styles/tailwind.css`
 
 ## Running the Application
-1. Start the server: `node server.js`
+1. Start the server: `node ./src/server.js`
 2. Access the application at `http://localhost:3000`
 
 ## File Structure
