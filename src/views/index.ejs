@@ -1,0 +1,65 @@
+<div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-96 transition-colors duration-300">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-600 dark:text-blue-400">Data Visualization App</h1>
+    <form action="/data/process" method="POST" enctype="multipart/form-data" class="space-y-4">
+        <div class="flex items-center justify-center w-full">
+            <label for="file-upload" id="drop-zone"
+                class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                    </svg>
+                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to
+                            upload</span> or drag and drop</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">CSV or XLSX files</p>
+                </div>
+                <input id="file-upload" type="file" name="file" accept=".csv,.xlsx" class="hidden" />
+            </label>
+        </div>
+        <p id="file-name" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
+        <button type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            Process Data
+        </button>
+
+        <!-- Add this somewhere in your form -->
+        <a href="/files" class="text-blue-600 dark:text-blue-400 hover:underline">View uploaded files</a>
+
+    </form>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-upload');
+    const fileNameDisplay = document.getElementById('file-name');
+    function handleFile(file) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        fileNameDisplay.textContent = 'Selected file: ' + file.name;
+    }
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('bg-gray-200', 'dark:bg-gray-600');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+        if (e.dataTransfer.files.length) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFile(e.target.files[0]);
+        }
+    });
+</script>

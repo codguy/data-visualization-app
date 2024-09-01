@@ -1,0 +1,26 @@
+{
+  "name": "data-visualization-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/styles/tailwind.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.20",
+    "chart.js": "^4.4.4",
+    "csv-parser": "^3.0.0",
+    "ejs": "^3.1.10",
+    "ejs-mate": "^4.0.0",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "file-type": "^16.5.4",
+    "multer": "^1.4.5-lts.1",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "xlsx": "^0.18.5"
+  },
+  "description": ""
+}
