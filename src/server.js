@@ -34,6 +34,8 @@ app.use('/data', upload.single('file'), dataRoutes);
 
 app.get('/', DataController.getIndex);
 
+app.delete('/data/delete/:filename', DataController.deleteFile);
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

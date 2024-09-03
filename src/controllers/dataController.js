@@ -73,6 +73,19 @@ class DataController {
             res.status(500).send('Error listing files');
         }
     }
+
+    static async deleteFile(req, res) {
+        try {
+            const { filename } = req.params;
+            console.log('Deleting file:', filename, req);
+            let filePath = path.join(__dirname, '..', '..', 'uploads', filename);
+            await fs.unlink(filePath);
+            res.status(200).send('File deleted successfully');
+        } catch (error) {
+            console.error('Error deleting file:', error);
+            res.status(500).send(error.message);
+        }
+    }
 }
 async function determineMimeType(filePath) {
     const buffer = await fs.readFile(filePath, { length: 8 });

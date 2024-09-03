@@ -138,104 +138,141 @@
     const rawData = <%- rawData %>;
     const ctx = document.getElementById('myChart').getContext('2d');
     let myChart;
-    function updateChart() {
-        const chartType = document.getElementById('chartType').value;
-        const xAxis = document.getElementById('xAxis').value;
-        const yAxes = Array.from(document.querySelectorAll('input[name="yAxis"]:checked')).map(checkbox => checkbox.value);
-        const isDarkMode = document.querySelector('html').classList.contains('dark');
 
-        const datasets = yAxes.map(yAxis => ({
-            label: yAxis,
-            data: rawData.map(item => item[yAxis]),
-            backgroundColor: getRandomColor(0.5),
-            borderColor: getRandomColor(1),
-            borderWidth: 2,
-            fill: chartType === 'area'
-        }));
-
-        const chartData = {
-            labels: rawData.map(item => item[xAxis]),
-            datasets: datasets
-        };
-
-        if (myChart) {
-            myChart.destroy();
-        }
-        const verticalLinePlugin = {
-            id: 'verticalLine',
-            afterDraw: (chart) => {
-                const chartTypeWithLine = ['bar', 'line', 'scatter', 'bubble', 'area'];
-                if (!chartTypeWithLine.includes(chart.config.type === 'line' ? 'area' : chart.config.type)) return;
-
-                if (chart.tooltip._active && chart.tooltip._active.length) {
-                    const activePoint = chart.tooltip._active[0];
-                    const ctx = chart.ctx;
-                    let x;
-
-                    if (chart.config.type === 'scatter' || chart.config.type === 'bubble') {
-                        x = chart.scales.x.getPixelForValue(activePoint.raw.x);
-                    } else {
-                        x = activePoint.element.x;
-                    }
-
-                    const topY = chart.scales.y.top;
-                    const bottomY = chart.scales.y.bottom;
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(x, topY);
-                    ctx.lineTo(x, bottomY);
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = '#ff0000';
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-        };
-        myChart = new Chart(ctx, {
-            type: chartType === 'area' ? 'line' : chartType,
-            data: chartData,
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        ticks: {
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568'
-                        },
-                        grid: {
-                            color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568'
-                        },
-                        grid: {
-                            color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: isDarkMode ? '#e2e8f0' : '#4a5568'
-                        }
-                    },
-                    tooltip: {
-                        mode: 'nearest',
-                        intersect: false,
-                        axis: 'x'
-                    }
-                },
-                lineTension: 0.2
-            },
-            plugins: [verticalLinePlugin]
-        });
+    function replaceAlphaValue(color) {
+        // Use a regular expression to match the RGBA pattern and capture the first three numbers
+        return color.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*1\)/, 'rgba($1, $2, $3, 0.2)');
     }
 
-    function getRandomColor(alpha) {
-        return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${alpha})`;
+    function updateChart() {
+    const chartType = document.getElementById('chartType').value;
+    const xAxis = document.getElementById('xAxis').value;
+    const yAxes = Array.from(document.querySelectorAll('input[name="yAxis"]:checked')).map(checkbox => checkbox.value);
+    const isDarkMode = document.querySelector('html').classList.contains('dark');
+
+    const datasets = yAxes.map(yAxis => {
+        const data = rawData.map(item => item[yAxis]);
+        let sum = 0;
+        data.map((value) => {
+            sum += parseInt(value);
+        })
+        const average = sum / data.length;
+        let color = getRandomColor(1, isDarkMode);
+        const newColor = replaceAlphaValue(color);
+        return [
+            {
+                label: yAxis,
+                data: data,
+                backgroundColor: newColor,
+                borderColor: color,
+                borderWidth: 2,
+                fill: chartType === 'area',
+            },
+            {
+                label: `${yAxis} (Average)`,
+                data: Array(data.length).fill(average),
+                borderColor: color,
+                borderWidth: 2,
+                borderDash: [6, 3],
+                pointRadius: 0,
+                fill: false,
+            }
+        ];
+    }).flat(); // Flatten the array to combine all datasets
+
+    const chartData = {
+        labels: rawData.map(item => item[xAxis]),
+        datasets: datasets
+    };
+
+    if (myChart) {
+        myChart.destroy();
+    }
+    const verticalLinePlugin = {
+        id: 'verticalLine',
+        afterDraw: (chart) => {
+            const chartTypeWithLine = ['bar', 'line', 'scatter', 'bubble', 'area'];
+            if (!chartTypeWithLine.includes(chart.config.type === 'line' ? 'area' : chart.config.type)) return;
+
+            if (chart.tooltip._active && chart.tooltip._active.length) {
+                const activePoint = chart.tooltip._active[0];
+                const ctx = chart.ctx;
+                let x;
+
+                if (chart.config.type === 'scatter' || chart.config.type === 'bubble') {
+                    x = chart.scales.x.getPixelForValue(activePoint.raw.x);
+                } else {
+                    x = activePoint.element.x;
+                }
+
+                const topY = chart.scales.y.top;
+                const bottomY = chart.scales.y.bottom;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, topY);
+                ctx.lineTo(x, bottomY);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#ff0000';
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+    myChart = new Chart(ctx, {
+        type: chartType === 'area' ? 'line' : chartType,
+        data: chartData,
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    ticks: {
+                        color: isDarkMode ? '#e2e8f0' : '#4a5568'
+                    },
+                    grid: {
+                        color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: isDarkMode ? '#e2e8f0' : '#4a5568'
+                    },
+                    grid: {
+                        color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: isDarkMode ? '#e2e8f0' : '#4a5568'
+                    }
+                },
+                tooltip: {
+                    mode: 'nearest',
+                    intersect: false,
+                    axis: 'x'
+                }
+            },
+            lineTension: 0.2
+        },
+        plugins: [verticalLinePlugin]
+    });
+}
+
+
+    function getRandomColor(alpha, isDarkMode) {
+        console.log(isDarkMode);
+        // Adjust the range of color values based on the isDarkMode flag
+        const minColorValue = isDarkMode ? 80 : 0;  // Lower min for more variety
+        const maxColorValue = isDarkMode ? 255 : 160; // Adjust max to allow a range of brightness
+
+        const r = Math.floor(Math.random() * (maxColorValue - minColorValue + 1)) + minColorValue;
+        const g = Math.floor(Math.random() * (maxColorValue - minColorValue + 1)) + minColorValue;
+        const b = Math.floor(Math.random() * (maxColorValue - minColorValue + 1)) + minColorValue;
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     document.getElementById('chartType').addEventListener('change', updateChart);
@@ -243,20 +280,5 @@
     document.querySelectorAll('input[name="yAxis"]').forEach(checkbox => {
         checkbox.addEventListener('change', updateChart);
     });
-
-    // Initial chart render
     updateChart();
-
-    // Function to set the theme
-    // function setTheme(theme) {
-    //     if (theme === 'dark') {
-    //         document.documentElement.classList.add('dark');
-    //         toggle.checked = true;
-    //     } else {
-    //         document.documentElement.classList.remove('dark');
-    //         toggle.checked = false;
-    //     }
-    //     localStorage.setItem('darkMode', theme);
-    //     updateChart();
-    // }
 </script>
