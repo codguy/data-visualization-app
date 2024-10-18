@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/styles/tailwind.css --watch"
+    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/styles/tailwind.css --watch",
+    "start": "node ./src/server.js"
   },
   "keywords": [],
   "author": "",
